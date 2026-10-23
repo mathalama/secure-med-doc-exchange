@@ -42,7 +42,7 @@ The exchange must comply with the legislation of the Republic of Kazakhstan:
 
 In Kazakhstan, EDS keys are issued to individuals and organizations by the National Certification Authority of the RK (NCA RK); users sign documents in web applications through the NCA RK application NCALayer.
 
-> Evidence status: the problem description above is based on publicly available information and the team's assumptions. It will be confirmed or corrected by user interviews ([DIP-5](https://medexchange-diploma.youtrack.cloud/issue/DIP-5), `docs/02-evidence/`) and the literature review ([DIP-7](https://medexchange-diploma.youtrack.cloud/issue/DIP-7)).
+> Evidence status: the problem description above is based on publicly available information and the team's assumptions. It will be confirmed or corrected by user interviews ([DIP-5](https://medexchange-diploma.youtrack.cloud/issue/DIP-5), `docs/02-evidence/`). The literature review ([03-literature-review.md](03-literature-review.md)) and the existing systems comparison ([04-existing-systems.md](04-existing-systems.md)) support problems 1–3 and 5 from published sources ([DIP-7](https://medexchange-diploma.youtrack.cloud/issue/DIP-7)).
 
 ## 4. Target users
 
