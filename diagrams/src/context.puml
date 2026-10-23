@@ -1,0 +1,47 @@
+@startuml context
+!pragma layout smetana
+' System Context Diagram — MedExchange (DIP-8)
+' Source for diagrams/export/context.png. Actor and system names match docs/07-architecture.md §2.
+' Trust boundaries TB1, TB2, TB6 are described in docs/security/threat-model.md §3.
+
+title MedExchange — System Context Diagram (DIP-8)
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam rectangle {
+  BackgroundColor #EEF4FF
+  BorderColor #2457C5
+}
+skinparam actorBorderColor #1C2333
+
+actor "Doctor\n(R-DOC)" as doc
+actor "Registrar\n(R-REG)" as reg
+actor "Organization\nadministrator\n(R-ADM)" as adm
+actor "Security officer\n(R-SEC)" as sec
+actor "System\nadministrator\n(R-SYS)" as sys
+
+rectangle "User workstation" as ws #FAFAFA {
+  rectangle "NCALayer\n(NCA RK application)\n[external software]" as ncl #FFF4E5
+}
+
+rectangle "MedExchange\n\nsecure exchange of signed\nmedical documents between\nmedical organizations" as mx
+
+rectangle "NCA RK services\n(OCSP / CRL)\n[external system]" as nca #FFF4E5
+rectangle "External medical\ninformation system\n[external system, future]" as mis #F2F2F2
+
+doc --> mx : sends, opens, accepts\nsigned documents (HTTPS)
+reg --> mx : routes and tracks\ndocuments (HTTPS)
+adm --> mx : manages users and\nroles of own organization
+sec --> mx : reviews and exports\nthe audit log
+sys --> mx : registers and suspends\norganizations
+
+mx --> ncl : signing requests from\nthe web client\n(local WebSocket, TB2)
+mx --> nca : certificate status\nchecks (TB6)
+mis --> mx : REST API with\norganization token\n(FR-18, TB1)
+
+legend right
+  All users connect through the Internet over HTTPS (TB1).
+  NCALayer runs on the user's workstation; private keys never leave it.
+  TB1, TB2, TB6: trust boundaries, see docs/security/threat-model.md §3.
+endlegend
+@enduml

@@ -7,13 +7,14 @@ YouTrack: [DIP-5](https://medexchange-diploma.youtrack.cloud/issue/DIP-5)
 | Version | 0.2 (pre-defense 1) |
 | Status | Draft for supervisor review |
 | Owner | Almasuly Damir |
-| Related | [Proposal](01-proposal.md), [Architecture](07-architecture.md), [ADRs](adr/), [Interviews](02-evidence/interviews.md), [Use case diagram](../diagrams/export/use-case.png), [Prototype](08-prototype.md) |
+| Related | [Proposal](01-proposal.md), [Architecture](07-architecture.md), [ADRs](adr/), [Interviews](02-evidence/interviews.md), [Use case diagram](../diagrams/export/use-case.png), [Prototype](08-prototype.md), [Threat model](security/threat-model.md), [Verification plan](09-verification-plan.md) |
+| Security and non-functional requirements | Korazbay Alikhan ([DIP-8](https://medexchange-diploma.youtrack.cloud/issue/DIP-8)) |
 
 > **Evidence status.** Every requirement has a *Source* and a *Status*.
 > **Assumption**: derived from the proposal, the ADRs or domain analysis, not yet confirmed by users.
 > **Verified**: confirmed by findings in [02-evidence/interviews.md](02-evidence/interviews.md) (finding ID in *Source*).
 > No interviews are recorded yet, so every item is *Assumption*. Update both columns as interviews are added.
-> Security requirements (threat model, controls) are specified separately in [DIP-8](https://medexchange-diploma.youtrack.cloud/issue/DIP-8); the non-functional requirements below list only what the functional scope depends on.
+> Security requirements NFR-12 – NFR-26 are derived from the STRIDE threat model ([security/threat-model.md](security/threat-model.md), threats T-xx in *Source*) in [DIP-8](https://medexchange-diploma.youtrack.cloud/issue/DIP-8). Acceptance criteria of all non-functional requirements are in [§4.2](#42-non-functional-requirements); the tests are described in [09-verification-plan.md](09-verification-plan.md).
 
 ## 1. Actors and roles
 
@@ -74,10 +75,29 @@ Priority: MoSCoW for the final system. **M**ust, **S**hould, **C**ould.
 | NFR-09 | Usability | The web client works in the current versions of Chrome, Edge and Firefox on a 1366×768 screen and is available in Russian (Kazakh in the final version). | S | — | Assumption |
 | NFR-10 | Compliance | Processing of personal and medical data follows Law No. 94-V and Art. 60 of Code No. 360-VI; only test data is used in the project. | M | Proposal §3 | Assumption |
 | NFR-11 | Deployability | The whole system starts with `docker compose up` and a documented `.env`. | S | Proposal §7 | Assumption |
+| NFR-12 | Security | Access tokens are JWTs signed with one fixed algorithm and a key of at least 256 bits from secret configuration, valid for at most 15 minutes. The refresh token is single-use, kept in an `HttpOnly`, `Secure`, `SameSite=Strict` cookie and revoked on logout, password change and user deactivation. | M | T-02, T-32, T-34 | Assumption |
+| NFR-13 | Security | Every API request is validated against a strict schema (unknown fields rejected). The file type is determined by content (PDF, JPEG, PNG). The proxy rejects request bodies over 26 MB and the API rejects files over 25 MB. | M | T-13, T-26, T-31 | Assumption |
+| NFR-14 | Security | Responses set HSTS (max-age ≥ 1 year), a Content Security Policy without `unsafe-inline` that allows connections only to the own origin and `wss://127.0.0.1:13579`, `X-Content-Type-Options: nosniff`, `frame-ancestors 'none'` and `Referrer-Policy: no-referrer`. User-provided text is output-encoded, and state-changing requests are protected against CSRF. | M | T-02, T-05, T-10, T-11 | Assumption |
+| NFR-15 | Security | Login and TOTP endpoints accept at most 10 requests per minute per IP address and per account; other endpoints at most 120 requests per minute per user; excess requests get HTTP 429. | S | T-01, T-26, T-27 | Assumption |
+| NFR-16 | Security | A signature is accepted only if the signer IIN equals the IIN of the authenticated user, the signer BIN equals the BIN of the sender organization, the CMS signature covers exactly the uploaded file, and the same signature has not been used for another document. | M | T-03, T-04, T-11; ADR 0005 | Assumption |
+| NFR-17 | Security | Only the reverse proxy publishes ports (443; 80 only redirects). The API, signature service, database and file storage are reachable only inside the internal Docker network. The signature service has no access to the database or file storage. The application database role has no rights beyond its tables. | M | T-07, T-21; ADR 0005 | Assumption |
+| NFR-18 | Security | Each file is encrypted with its own random 256-bit data key and a unique 96-bit nonce. The data key is stored wrapped by a master key. The master key and the JWT signing key come from secret configuration and never appear in the database, backups, logs or the repository. A key rotation procedure is documented. | M | T-19, T-22, T-23, T-32; ADR 0002 | Assumption |
+| NFR-19 | Security | Application logs never contain passwords, TOTP codes or secrets, tokens, document content or full IINs (IINs are masked). | M | T-02, T-20 | Assumption |
+| NFR-20 | Security | Dependencies and base images are pinned. CI runs static analysis, dependency, secret and container image scans on every pull request. A milestone is released with no open High or Critical finding, unless an exception is documented. Containers run as a non-root user. | M | T-23, T-31, T-33 | Assumption |
+| NFR-21 | Availability | The database and file storage are backed up daily in encrypted form; a restore is tested before each pre-defense; RPO ≤ 24 h, RTO ≤ 4 h. | S | T-19, T-29 | Assumption |
+| NFR-22 | Security | Error responses never contain stack traces, SQL, internal paths or component versions. A failed login returns the same message whether or not the login exists. | M | T-20, T-24 | Assumption |
+| NFR-23 | Security | A TOTP code is accepted only once and only within its 30-second step (± 1 step). An EDS authentication challenge (FR-19) is random (≥ 128 bits), single-use and valid for at most 60 seconds. | M | T-05, T-06 | Assumption |
+| NFR-24 | Security | If the certificate status cannot be determined (OCSP unavailable and no valid CRL), the document is not delivered. Its status is "verification pending", verification is retried at least 3 times within 15 minutes, and then the sender is notified. | M | T-28; ADR 0005 | Assumption |
+| NFR-25 | Security | The audit record of sending a document contains the SHA-256 of the file and of the canonical metadata; the integrity check (FR-16) reports every document whose current metadata no longer matches. | S | T-09 | Assumption |
+| NFR-26 | Security | The hash of the latest audit record is exported outside the database at least daily; the integrity check compares the chain with the last exported hash. | S | T-12 | Assumption |
 
 ## 4. Acceptance criteria
 
-Given–When–Then criteria for the *Must* requirements; each is a test case for the verification plan ([DIP-8](https://medexchange-diploma.youtrack.cloud/issue/DIP-8)).
+Each criterion is a test case of the verification plan ([09-verification-plan.md](09-verification-plan.md)).
+
+### 4.1 Functional requirements
+
+Given–When–Then criteria for the *Must* functional requirements.
 
 | Req. | Acceptance criterion |
 |---|---|
@@ -94,6 +114,39 @@ Given–When–Then criteria for the *Must* requirements; each is a test case fo
 | FR-11 | **Given** a document sent to B, **when** its status changes, **then** the sender sees the new status and a notification within 5 s, and the status history shows each change with time and user. |
 | FR-12 | **Given** a delivered document, **when** its `DocumentReference` is downloaded, **then** it validates against FHIR R4 (`fhir.resources`) and contains the patient, author, custodian, type, date and the file hash. |
 | FR-15 | **Given** any event listed in FR-15, **when** it occurs, **then** a record with actor, action, object, time and IP exists in the audit log within 1 s. |
+
+### 4.2 Non-functional requirements
+
+Measurable criteria for every non-functional requirement. Measurement conditions (environment, data, repetitions) are defined in [09-verification-plan.md §5](09-verification-plan.md#5-measurement-conditions).
+
+| Req. | Acceptance criterion | Test |
+|---|---|---|
+| NFR-01 | testssl.sh against the public endpoint reports only TLS 1.2 and 1.3 enabled and no finding of severity High or Critical; `http://` requests return 301 to `https://`. | ST-10 |
+| NFR-02 | For 20 uploaded test files, none of the objects in SeaweedFS starts with the file signature (`%PDF`, JPEG, PNG) or contains the original bytes; decryption with a different key fails; the master key is not found in a full database dump. | ST-06 |
+| NFR-03 | All password hashes in the database have the `$argon2id$` format with at least m = 19 MiB, t = 2; gitleaks over the full Git history reports 0 findings. | ST-13 |
+| NFR-04 | After 5 wrong passwords the 6th attempt with the correct password is rejected; login succeeds again after 15 min (± 1 min). A session without requests for 15 min receives 401 on the next request. | ST-03 |
+| NFR-05 | `UPDATE` and `DELETE` on the audit table under the application role fail with "permission denied"; in 20 out of 20 direct modifications or deletions of random records (as database superuser) the integrity check reports the first broken record. | ST-07 |
+| NFR-06 | The authorization matrix test (every endpoint × role × own/other organization) produces 0 unexpected allowed responses; 100% of requests with document IDs of another organization return 404. | ST-01, ST-02 |
+| NFR-07 | k6 with 50 virtual users for 10 min on the reference dataset: p95 of list and metadata requests ≤ 500 ms; p95 of signature verification ≤ 3 s over at least 100 verifications. | PT-01 |
+| NFR-08 | Usability test with at least 5 participants: median time from opening "New document" to a sent, signed document ≤ 2 min; mean SUS ≥ 68. | UT-01 |
+| NFR-09 | The e2e suite passes in the current Chrome, Edge and Firefox at 1366×768; no UI string is missing a Russian translation. | E2E |
+| NFR-10 | Compliance checklist (§3 of the verification plan) passes 100%: only synthetic data in the repository and test databases, consent recorded for 100% of sent documents, deployment location documented. | CL-01 |
+| NFR-11 | On a clean machine with Docker, `docker compose up` with `.env.example` brings all services to "healthy" within 5 min without manual steps beyond the README. | DT-01 |
+| NFR-12 | A token with a modified payload, `alg: none`, another key or an expired `exp` returns 401; a refresh token used twice is rejected and revokes the session; after logout or deactivation old tokens return 401 within 15 min (refresh at once). | ST-04 |
+| NFR-13 | Requests with unknown fields return 422; a renamed `.exe` with a `.pdf` extension, a 30 MB file and a 27 MB request body are rejected (422 / 413). | ST-08 |
+| NFR-14 | The security headers listed in NFR-14 are present on every HTML and API response; a `<script>` payload in title or comment is shown as text; a cross-site POST without the CSRF token is rejected. | ST-09 |
+| NFR-15 | The 11th login request within one minute from one IP returns 429; normal use (UI e2e suite) never receives 429. | ST-15 |
+| NFR-16 | In the signature test corpus, 100% of documents signed by another user, by a user of another organization, over a different file, or with a reused signature are rejected. | ST-05 |
+| NFR-17 | nmap from outside the Docker host finds only ports 80 and 443 open; from the signature service container, connections to the database and storage fail. | ST-11 |
+| NFR-18 | Two uploads of the same file produce different ciphertexts and different wrapped data keys; the master key and JWT key are absent from database dumps, backups, logs and the repository (search for their values returns 0 hits); the rotation procedure is executed once on the test environment and all files remain readable. | ST-06, ST-13 |
+| NFR-19 | After a full e2e run, a search of all container logs for the test passwords, TOTP secrets, tokens, full test IINs and document text returns 0 hits. | ST-14 |
+| NFR-20 | The CI pipeline contains all four scan types and fails on High/Critical findings; all images run with a non-root UID. | ST-13 |
+| NFR-21 | A restore from the latest backup to an empty environment completes within 4 h, and 100% of test documents open with valid hashes. | ST-16 |
+| NFR-22 | ZAP and the API error tests find no stack trace, SQL text, internal path or version in any response; responses for a non-existent login and a wrong password are identical. | ST-03, ST-12 |
+| NFR-23 | A TOTP code reused within its window is rejected; an EDS challenge signed after 60 s or used twice is rejected. | ST-03 |
+| NFR-24 | With OCSP blocked and no valid CRL, 100% of sent test documents stay "verification pending" and are not visible to the recipient; after 3 failed retries the sender is notified; after OCSP is restored they are verified and delivered. | ST-05 |
+| NFR-25 | After a direct change of patient IIN or recipient in the database, the integrity check reports the changed document in 100% of 10 trials. | ST-07 |
+| NFR-26 | After the audit chain is rewritten consistently from some record onward (all hashes recomputed), the integrity check detects the mismatch with the last exported head hash. | ST-07 |
 
 ## 5. Role matrix
 
