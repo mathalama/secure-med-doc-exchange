@@ -15,8 +15,8 @@ _To be completed in [DIP-2](https://medexchange-diploma.youtrack.cloud/issue/DIP
 | Member | GitHub | Role |
 |---|---|---|
 | Sagyntai Aikyn | [@mathalama](https://github.com/mathalama) | Backend Lead, Team Lead |
-| Korazbay Alikhan | [@AlikShal](https://github.com/AlikShal) | Frontend Developer & UX Designer |
-| Almasuly Damir | [@smuzyyq](https://github.com/smuzyyq) | Security Analyst & QA Engineer |
+| Korazbay Alikhan | [@AlikShal](https://github.com/AlikShal) | Security Analyst & QA Engineer |
+| Almasuly Damir | [@smuzyyq](https://github.com/smuzyyq) | Frontend Developer & UX Designer |
 
 **Supervisor:** Bakiyeva Aigerim Muratovna, Assistant Professor
 
