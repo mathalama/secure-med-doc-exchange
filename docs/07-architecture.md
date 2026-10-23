@@ -117,7 +117,7 @@ The detailed ER diagram is prepared at the implementation stage.
 | Accountability | Append-only audit log, written in the same transaction as the action | C3.6 |
 | Secrets | Configuration through environment variables; `.env` is not committed | All |
 
-The threat model (STRIDE) and security requirements are prepared in [DIP-8](https://medexchange-diploma.youtrack.cloud/issue/DIP-8) (`docs/security/threat-model.md`).
+The threat model (STRIDE), trust boundaries and the mapping of threats to requirements are in [security/threat-model.md](security/threat-model.md); the security requirements are NFR-01 – NFR-06 and NFR-12 – NFR-26 in [06-requirements.md](06-requirements.md#3-non-functional-requirements) ([DIP-8](https://medexchange-diploma.youtrack.cloud/issue/DIP-8)). The System Context Diagram is [`diagrams/export/context.png`](../diagrams/export/context.png) ([source](../diagrams/src/context.puml)).
 
 ## 7. Deployment
 
@@ -136,21 +136,21 @@ NCALayer is installed on the user's workstation, not in Docker. The KalkanCrypt 
 
 ## 8. Traceability: components → drivers
 
-Drivers D1–D6 are defined in [05-technology-comparison.md](05-technology-comparison.md#project-requirements-that-drive-the-decisions). The column "Requirements" will be filled with requirement IDs from `docs/06-requirements.md` after DIP-5 and DIP-8.
+Drivers D1–D6 are defined in [05-technology-comparison.md](05-technology-comparison.md#project-requirements-that-drive-the-decisions). Requirement IDs refer to [06-requirements.md](06-requirements.md).
 
 | Component | Drivers | Requirements |
 |---|---|---|
-| C1 Web client | D4, D5 | _TBD (DIP-5)_ |
-| C2 Reverse proxy | D2, D6 | _TBD (DIP-8)_ |
-| C3.1 Auth | D1, D2 | _TBD_ |
-| C3.2 Organizations & users | D2, D4 | _TBD_ |
-| C3.3 / C3.4 Documents, exchange | D4 | _TBD_ |
-| C3.5 FHIR | D3 | _TBD_ |
-| C3.6 Audit | D2, D4 | _TBD_ |
-| C3.7 Storage | D2 | _TBD_ |
-| C3.8 / C4 Signature | D1 | _TBD_ |
-| C5 Database | D4 | _TBD_ |
-| C6 File storage | D2, D6 | _TBD_ |
+| C1 Web client | D4, D5 | FR-04 – FR-11, FR-13, FR-14, FR-16, NFR-08, NFR-09, NFR-14 |
+| C2 Reverse proxy | D2, D6 | NFR-01, NFR-13 (body size), NFR-14, NFR-15, NFR-17 |
+| C3.1 Auth | D1, D2 | FR-01, FR-19, NFR-03, NFR-04, NFR-12, NFR-15, NFR-22, NFR-23 |
+| C3.2 Organizations & users | D2, D4 | FR-02, FR-03, FR-20, NFR-06 |
+| C3.3 / C3.4 Documents, exchange | D4 | FR-04 – FR-06, FR-10, FR-11, FR-13, FR-14, FR-18, NFR-06, NFR-13 |
+| C3.5 FHIR | D3 | FR-12 |
+| C3.6 Audit | D2, D4 | FR-15, FR-16, NFR-05, NFR-25, NFR-26 |
+| C3.7 Storage | D2 | FR-17, NFR-02, NFR-18 |
+| C3.8 / C4 Signature | D1 | FR-07, FR-08, NFR-16, NFR-24 |
+| C5 Database | D4 | NFR-05, NFR-17, NFR-21 |
+| C6 File storage | D2, D6 | NFR-02, NFR-17, NFR-21 |
 
 ## 9. Open questions
 
