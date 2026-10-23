@@ -1,0 +1,35 @@
+@startuml component
+' Component Diagram (draft) — MedExchange
+' Source for diagrams/export/component.png. See docs/07-architecture.md.
+
+title MedExchange — Component Diagram (draft)
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment center
+top to bottom direction
+
+actor "User\n(doctor, registrar,\nadministrator)" as User
+
+package "User workstation" {
+  [Web client (C1)] as Web
+  [NCALayer] as NCALayer
+}
+
+package "Server (Docker)" {
+  [Main API — FastAPI (C3)\n\nauth, users & roles, documents,\nexchange, FHIR, audit, encryption] as API
+  [Signature service — Java,\nKalkanCrypt SDK (C4)] as Signature
+  database "PostgreSQL (C5)" as DB
+  database "SeaweedFS (C6)" as Files
+}
+
+cloud "NCA RK\n(OCSP / CRL)" as NCA
+
+User --> Web
+Web -right-> NCALayer : sign document
+Web --> API : REST API (HTTPS)
+API -right-> Signature : verify signature
+Signature --> NCA : certificate status
+API --> DB : data, audit
+API --> Files : encrypted files
+
+@enduml
