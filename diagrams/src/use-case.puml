@@ -1,0 +1,72 @@
+@startuml use-case
+!pragma layout smetana
+title MedExchange — Use Case Diagram (DIP-5)
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #EEF4FF
+  BorderColor #2457C5
+}
+skinparam actorBorderColor #1C2333
+
+actor "Doctor\n(R-DOC)" as doc
+actor "Registrar\n(R-REG)" as reg
+actor "Organization\nadministrator\n(R-ADM)" as adm
+actor "Security officer\n(R-SEC)" as sec
+actor "System\nadministrator\n(R-SYS)" as sys
+
+actor "NCALayer" as ncl <<system>>
+actor "NCA RK services\n(OCSP / CRL)" as nca <<system>>
+actor "External medical\ninformation system" as mis <<system>>
+
+doc -|> reg
+
+rectangle "MedExchange" {
+  usecase "UC-01 Sign in\nFR-01, FR-19" as UC1
+  usecase "UC-02 Manage users\nand roles\nFR-02, FR-03" as UC2
+  usecase "UC-03 Send a document\nFR-04..FR-07, FR-14" as UC3
+  usecase "Confirm patient consent\nFR-05" as UCc
+  usecase "Sign with EDS\nFR-07" as UCs
+  usecase "UC-04 Verify signature\nFR-08" as UC4
+  usecase "UC-05 View incoming\ndocuments\nFR-11, FR-13" as UC5
+  usecase "UC-06 Open and verify\na document\nFR-09, FR-12, FR-17" as UC6
+  usecase "UC-07 Accept or reject\na document\nFR-10" as UC7
+  usecase "UC-08 Track and revoke\nsent documents\nFR-11, FR-14" as UC8
+  usecase "UC-09 Review the\naudit log\nFR-15, FR-16" as UC9
+  usecase "UC-10 Exchange\nthrough the API\nFR-18 (Could)" as UC10
+  usecase "UC-11 Register\norganizations\nFR-20" as UC11
+}
+
+reg --> UC1
+reg --> UC3
+reg --> UC5
+reg --> UC6
+reg --> UC8
+doc --> UC7
+adm --> UC1
+adm --> UC2
+adm --> UC9
+sec --> UC1
+sec --> UC9
+sys --> UC1
+sys --> UC11
+
+UC3 ..> UCc : <<include>>
+UC3 ..> UCs : <<include>>
+UC3 ..> UC4 : <<include>>
+UC6 ..> UC4 : <<include>>
+UC7 ..> UCs : <<include>>
+UC7 ..> UC6 : <<include>>
+
+UCs --> ncl
+UC4 --> nca
+mis --> UC10
+UC10 ..> UC3 : <<extend>>
+
+legend right
+  Doctor inherits all use cases of Registrar.
+  Every use case writes an audit record (FR-15).
+endlegend
+@enduml
