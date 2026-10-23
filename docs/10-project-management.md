@@ -93,14 +93,26 @@ Dates of pre-defense 2 and the final pre-defense will be fixed according to the 
 
 ## 7. Risk register
 
-_To be completed in [DIP-8](https://medexchange-diploma.youtrack.cloud/issue/DIP-8) by the Security Analyst (risk, probability, impact, mitigation, owner)._
+Owner of the register: Korazbay Alikhan ([DIP-8](https://medexchange-diploma.youtrack.cloud/issue/DIP-8)). The register is reviewed at the weekly sync and at every milestone. Security risks of the system itself are analyzed in the [threat model](security/threat-model.md); this register covers project risks.
 
-Risks already identified during planning:
+Scale: probability (P) and impact (I) are **L** = 1, **M** = 2, **H** = 3; score = P × I. A score of 6 or more is a high risk and is discussed at every weekly sync.
 
-| Risk | Source |
-|---|---|
-| Delayed access to the KalkanCrypt SDK / NCA RK test keys; transition to GOST 34.10-2015 | [ADR 0005](adr/0005-eds-signing-and-verification.md) |
-| NCALayer not available in the demo environment | [ADR 0005](adr/0005-eds-signing-and-verification.md) |
-| Limited access to real users for interviews and validation | [Proposal §10](01-proposal.md#10-main-risks-summary) |
-| Two backend services in two languages increase integration and deployment effort | [ADR 0001](adr/0001-server-platform.md) |
-| Limited time of a three-person team | [Proposal §10](01-proposal.md#10-main-risks-summary) |
+| ID | Risk | P | I | Score | Mitigation | Contingency (if it happens) | Owner | Trigger / indicator | Source |
+|---|---|:-:|:-:|:-:|---|---|---|---|---|
+| R-01 | Delayed access to the KalkanCrypt SDK or NCA RK test keys; NCA RK transition to GOST 34.10-2015 changes the algorithms | M | H | 6 | Request SDK and test keys in M2; define the verification API first and develop against a stub; test with both RSA and GOST test keys | Demonstrate with test keys only; describe GOST support as a limitation | Aikyn | SDK or keys not received by 15.11.2026 | [ADR 0005](adr/0005-eds-signing-and-verification.md) |
+| R-02 | NCALayer does not work in the demo environment (version, browser, certificate) | M | H | 6 | Dedicated demo workstation prepared and checked one week before each defense; NCALayer stub for automated E2E | Recorded video of the signing scenario; stub mode clearly labelled | Damir | Failed rehearsal | [ADR 0005](adr/0005-eds-signing-and-verification.md) |
+| R-03 | Limited access to real users for interviews and the usability test | H | M | 6 | Contacts through university clinics and the supervisor; remote sessions; medical students as proxy participants | Requirements stay "Assumption"; limitation stated in the report | Damir (interviews), Alikhan (UT-01) | Fewer than 3 interviews by M2 | [Proposal §10](01-proposal.md#10-main-risks-summary) |
+| R-04 | Two backend services in two languages increase integration and deployment effort | M | M | 4 | Narrow internal API (`verify`, `certificate-info`) with contract tests; integration in M3, not at the end | Simplify the signature service to a single endpoint | Aikyn | Integration tests failing for more than one week | [ADR 0001](adr/0001-server-platform.md) |
+| R-05 | Limited time of a three-person team | H | H | 9 | MoSCoW priorities; Could requirements dropped first; weekly sync; one-week buffer before every pre-defense | Re-plan the iteration with the supervisor; cut Should scope | Aikyn | Iteration goals missed twice | [Proposal §10](01-proposal.md#10-main-risks-summary) |
+| R-06 | A High / Critical vulnerability is found late, close to the final pre-defense | M | H | 6 | CI security scans from M2 (NFR-20); threat-model tests run in each iteration, not only in M6 | Fix window in M6; document a justified exception | Alikhan | Open High finding older than 2 weeks | [Verification plan](09-verification-plan.md) |
+| R-07 | Real patient data accidentally enters the repository or the test database | L | H | 3 | Synthetic data generator; secret / pattern scanning in CI; compliance checklist CL-01; rule in the README | Remove from history, rotate any exposed secrets, inform the supervisor | Alikhan | Scanner finding, review comment | NFR-10 |
+| R-08 | Secrets (JWT key, file master key, test key passwords) leak through the repository or logs | M | M | 4 | `.env` not committed; gitleaks in CI; log hygiene tests (ST-14) | Rotate keys using the documented procedure (NFR-18) | Alikhan | gitleaks or ST-14 finding | [Threat model](security/threat-model.md) T-23 |
+| R-09 | NCA RK test OCSP / CRL services unavailable during tests or the demo | M | M | 4 | Fail-closed handling (NFR-24) is itself demonstrated; cached CRL within validity; schedule tests with retries | Show "verification pending" behavior; repeat the run later | Aikyn | OCSP errors in the signature service logs | ADR 0005, NFR-24 |
+| R-10 | Legal requirements (personal data, consent, storage location, EDS) are interpreted incorrectly | M | M | 4 | Requirements cite the laws; questions recorded and checked with the supervisor; only test data processed | Adjust requirements; state the interpretation as a limitation | Alikhan | Supervisor or committee comment | [Proposal §3](01-proposal.md#3-problem-statement) |
+| R-11 | A chosen component stops being maintained (as happened with MinIO) | L | M | 2 | Access through the S3 API; Garage kept as a fallback; dependency scanning shows unmaintained packages | Switch to the fallback component | Aikyn | Archived repository, no security fixes | [ADR 0002](adr/0002-data-storage.md) |
+| R-12 | A team member is unavailable for several weeks | L | H | 3 | Reviewer rotation gives every area a second person; documentation in the repository | Redistribute tasks; reduce Should scope | Aikyn | Absence longer than one week | Section 2 |
+| R-13 | Supervisor feedback arrives late or requires major changes | M | M | 4 | Drafts shared early; feedback recorded in `11-supervisor-feedback.md` | Plan a dedicated rework iteration | Aikyn | No feedback one week before a milestone | Section 6 |
+| R-14 | Performance targets (NFR-07) are not met because of encryption and signature verification | L | M | 2 | First measurement in M4; verification is asynchronous and does not block lists | Optimize or relax the target with justification | Aikyn | PT-01 p95 above target | NFR-07 |
+| R-15 | Scope creep: full FHIR server, real MIS integration, patient portal | M | M | 4 | Out-of-scope list in [proposal §8](01-proposal.md#8-project-scope); new scope only through YouTrack and the team lead | Move to "future work" | Aikyn | New tasks outside proposal §8 | Proposal §8 |
+
+Status of every risk is tracked in YouTrack (tag `risk`). A risk is closed when its trigger can no longer occur (for example, R-01 when the SDK and keys are received and verified).
