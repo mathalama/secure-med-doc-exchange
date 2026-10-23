@@ -197,7 +197,7 @@ ADR: [0003-component-interaction.md](adr/0003-component-interaction.md)
 
 **FHIR R4 `DocumentReference`** for document metadata (patient, author, organization, type, date, hash, link to the file), with the original file and its CMS signature stored in file storage. A full FHIR server is out of scope; only the resources needed for exchange are implemented.
 
-Limitation: no national requirement of the Ministry of Health of the RK to use HL7 FHIR was found during this analysis; FHIR is chosen as an international interoperability standard. National exchange formats are reviewed in the literature review ([DIP-7](https://medexchange-diploma.youtrack.cloud/issue/DIP-7)).
+Limitation: no national requirement of the Ministry of Health of the RK to use HL7 FHIR was found during this analysis; FHIR is chosen as an international interoperability standard. National exchange formats are reviewed in the literature review ([03-literature-review.md §2.7](03-literature-review.md#27-kazakhstan-national-context-and-exchange-formats)): the 2013–2020 e-health concept targeted HL7 v3, and no public FHIR requirement was found.
 
 ADR: [0004-document-format.md](adr/0004-document-format.md)
 

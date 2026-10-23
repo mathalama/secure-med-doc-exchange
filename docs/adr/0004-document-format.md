@@ -22,4 +22,4 @@ Describe each exchanged document with an **HL7 FHIR R4 `DocumentReference`** res
 - (+) Documents are described in an international standard and can be integrated with FHIR-based systems later.
 - (+) Only one resource type is needed, which keeps the implementation small.
 - (–) Only a subset of FHIR is supported; this limitation is stated in the project scope.
-- (–) Integration with national systems of the RK may require mapping to their formats; this is reviewed in the literature review (DIP-7).
+- (–) Integration with national systems of the RK may require mapping to their formats. The literature review ([03-literature-review.md §2.7](../03-literature-review.md#27-kazakhstan-national-context-and-exchange-formats), DIP-7) found that the 2013–2020 e-health concept targeted HL7 v3 and that no public FHIR requirement exists; mapping to national classifications is future work.
