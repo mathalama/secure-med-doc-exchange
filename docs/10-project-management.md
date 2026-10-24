@@ -42,7 +42,7 @@ Dates of pre-defense 2 and the final pre-defense will be fixed according to the 
 
 | # | Milestone | Target date | Main results | Git tag |
 |---|---|---|---|---|
-| M1 | Pre-defense 1: analysis and design | 24.10.2026 | Proposal, literature review, comparisons, requirements, diagrams, prototype, verification plan, YouTrack | `pre-defense-1` |
+| M1 | Pre-defense 1: analysis and design | 24.10.2026 | Proposal, literature review, comparisons, requirements, diagrams, prototype, verification plan, YouTrack | `prob-period-1` |
 | M2 | Iteration 1: foundation | 30.11.2026 | Docker Compose environment, database schema, organizations/users/roles, authentication, CI with tests | — |
 | M3 | Iteration 2: EDS and exchange | 31.12.2026 | Signature service with NCA RK test keys, NCALayer signing in the web client, sending/receiving documents, encrypted file storage | — |
 | M4 | Pre-defense 2: working core | _TBD (department schedule)_ | End-to-end scenario "send → verify → receive → open" demonstrated | `pre-defense-2` |
@@ -88,7 +88,7 @@ Dates of pre-defense 2 and the final pre-defense will be fixed according to the 
 - **Commits:** `DIP-<id>: <description>`; each commit is a coherent change.
 - **Pull requests:** each PR references its YouTrack task, explains the changes and how they were checked. The link to the PR is added to the task.
 - **Review:** another team member reviews every PR before merging. Default rotation: Aikyn → reviewed by Alikhan, Alikhan → reviewed by Damir, Damir → reviewed by Aikyn.
-- **Tags:** each pre-defense submission is tagged (`pre-defense-1`, `pre-defense-2`, `final-pre-defense`); tags are never moved.
+- **Tags:** each pre-defense submission is tagged (pre-defense 1: `prob-period-1`; later tags follow the department submission form); tags are never moved.
 - **Meetings:** short weekly team sync; meeting with the supervisor before each milestone. Supervisor feedback is recorded in [`11-supervisor-feedback.md`](11-supervisor-feedback.md).
 
 ## 7. Risk register
